@@ -3,7 +3,6 @@ import 'main_screen.dart';
 
 void main() {
   runApp(const MainApp());
-
 }
 
 class MainApp extends StatelessWidget {

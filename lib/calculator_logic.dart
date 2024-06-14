@@ -90,7 +90,7 @@ class CalculatorLogic {
       if ('0123456789'.contains(token[0])) {
         stack.add(double.parse(token));
       } else {
-        if (token == 'n') { // Unary minus
+        if (token == 'n') {
           double operand = stack.removeLast();
           stack.add(-operand);
         } else {
