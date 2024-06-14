@@ -137,6 +137,9 @@ class _MainScreenState extends State<MainScreen> {
               case "%":
                 percentResult();
                 break;
+              case "=":
+                calculateResult();
+                break;
               default:
                 enterNumber(labels[index]);
                 break;
