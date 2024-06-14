@@ -56,6 +56,7 @@ class _MainScreenState extends State<MainScreen> {
                 alignment: Alignment.bottomRight,
                 child: Text(
                   calcLogic.userInput,
+                  maxLines: 1,
                   style: TextStyle(
                     color: HexColor("#FFFFFF"),
                     fontSize: 48,
@@ -68,6 +69,7 @@ class _MainScreenState extends State<MainScreen> {
                 alignment: Alignment.bottomRight,
                 child: Text(
                   calcLogic.result,
+                  maxLines: 1,
                   style: TextStyle(
                     color: HexColor("#969696"),
                     fontSize: 48,

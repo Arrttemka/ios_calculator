@@ -1,8 +1,11 @@
 class CalculatorLogic {
   String userInput = '0';
   String result = '0';
-  String? lastOperation;
-  String? lastNumber;
+
+  void clearInput() {
+    userInput = '0';
+    result = '0';
+  }
 
   void enterNumber(String enteredDigit) {
     if (userInput == '0' && enteredDigit != '.') {
@@ -12,14 +15,6 @@ class CalculatorLogic {
       userInput += enteredDigit;
     }
   }
-
-  void clearInput() {
-    userInput = '0';
-    result = '0';
-    lastOperation = null;
-    lastNumber = null;
-  }
-
   void changeSign() {
     if (userInput != '0') {
       if (double.tryParse(userInput)! > 0) {
@@ -40,55 +35,80 @@ class CalculatorLogic {
     }
   }
 
-  void calculateResult() {
-    if (lastOperation != null && lastNumber != null) {
-      userInput = result + lastOperation! + lastNumber!;
-    }
-    try {
-      double res = 0;
-      if (userInput.contains('+')) {
-        var parts = userInput.split('+');
-        double part1 = double.parse(parts[0]);
-        double part2 = double.parse(parts[1]);
-        res = part1 + part2;
-      } else if (userInput.contains('–')) {
-        var parts = userInput.split('–');
-        double part1 = double.parse(parts[0]);
-        double part2 = double.parse(parts[1]);
-        res = part1 - part2;
-      } else if (userInput.contains('×')) {
-        var parts = userInput.split('×');
-        double part1 = double.parse(parts[0]);
-        double part2 = double.parse(parts[1]);
-        res = part1 * part2;
-      } else if (userInput.contains('÷')) {
-        var parts = userInput.split('÷');
-        double part1 = double.parse(parts[0]);
-        double part2 = double.parse(parts[1]);
-        if (part2 != 0) {
-          res = part1 / part2;
-        } else {
-          result = "Error";
-          lastOperation = null;
-          lastNumber = null;
-          userInput = result;
-          return;
-        }
-      } else {
-        lastOperation = null;
-        lastNumber = null;
-      }
+  // Преобразование входной строки в RPN
+  List<String> toRPN(String input) {
+    List<String> outputQueue = [];
+    List<String> operatorStack = [];
+    Map<String, int> precedence = {'+': 1, '–': 1, '×': 2, '÷': 2};
+    Map<String, int> associativity = {'+': 0, '–': 0, '×': 0, '÷': 0};  // 0 - left, 1 - right
 
-      if (res % 1 == 0) {  // Проверка, является ли число целым
-        result = res.toInt().toString();
-      } else {
-        result = res.toString();
+    int i = 0;
+    while (i < input.length) {
+      String token = input[i];
+      if ('0123456789.'.contains(token)) {
+        String number = '';
+        while (i < input.length && '0123456789.'.contains(input[i])) {
+          number += input[i];
+          i++;
+        }
+        outputQueue.add(number);
+        continue;
+      } else if ('+–×÷'.contains(token)) {
+        while (operatorStack.isNotEmpty &&
+            '×÷+–'.contains(operatorStack.last) &&
+            ((associativity[token] == 0 && precedence[token]! <= precedence[operatorStack.last]!) ||
+                (associativity[token] == 1 && precedence[token]! < precedence[operatorStack.last]!))) {
+          outputQueue.add(operatorStack.removeLast());
+        }
+        operatorStack.add(token);
       }
+      i++;
+    }
+
+    while (operatorStack.isNotEmpty) {
+      outputQueue.add(operatorStack.removeLast());
+    }
+    return outputQueue;
+  }
+
+  // Вычисление результата из RPN
+  double calculateFromRPN(List<String> tokens) {
+    List<double> stack = [];
+    for (String token in tokens) {
+      if ('0123456789'.contains(token[0])) {
+        stack.add(double.parse(token));
+      } else {
+        double secondOperand = stack.removeLast();
+        double firstOperand = stack.removeLast();
+        switch (token) {
+          case '+':
+            stack.add(firstOperand + secondOperand);
+            break;
+          case '–':
+            stack.add(firstOperand - secondOperand);
+            break;
+          case '×':
+            stack.add(firstOperand * secondOperand);
+            break;
+          case '÷':
+            if (secondOperand == 0) throw Exception('Division by zero');
+            stack.add(firstOperand / secondOperand);
+            break;
+        }
+      }
+    }
+    return stack.first;
+  }
+
+  void calculateResult() {
+    try {
+      List<String> rpn = toRPN(userInput);
+      double res = calculateFromRPN(rpn);
+      result = res.toString();
+      userInput = result;
     } catch (e) {
       result = "Error";
+      userInput = result;
     }
-    lastOperation = null;
-    lastNumber = null;
-    userInput = result;
   }
 }
