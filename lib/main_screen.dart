@@ -1,16 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'styles.dart';
 import 'calc_button.dart';
-import 'package:hexcolor/hexcolor.dart';
+import 'calculator_logic.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
-  String
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
+  final CalculatorLogic calcLogic = CalculatorLogic();
+
+  void enterNumber(String enteredDigit) {
+    setState(() {
+      calcLogic.enterNumber(enteredDigit);
+    });
+  }
+
+  void clearInput() {
+    setState(() {
+      calcLogic.clearInput();
+    });
+  }
+
+  void changeSign() {
+    setState(() {
+      calcLogic.changeSign();
+    });
+  }
+
+  void percentResult() {
+    setState(() {
+      calcLogic.percentResult();
+    });
+  }
+
+  void calculateResult() {
+    setState(() {
+      calcLogic.calculateResult();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -23,7 +55,7 @@ class _MainScreenState extends State<MainScreen> {
                 padding: const EdgeInsets.fromLTRB(0, 40, 19, 0),
                 alignment: Alignment.bottomRight,
                 child: Text(
-                  userInput,
+                  calcLogic.userInput,
                   style: TextStyle(
                     color: HexColor("#FFFFFF"),
                     fontSize: 48,
@@ -35,7 +67,7 @@ class _MainScreenState extends State<MainScreen> {
                 padding: const EdgeInsets.fromLTRB(0, 70, 19, 50),
                 alignment: Alignment.bottomRight,
                 child: Text(
-                  "9",
+                  calcLogic.result,
                   style: TextStyle(
                     color: HexColor("#969696"),
                     fontSize: 48,
@@ -69,11 +101,11 @@ class _MainScreenState extends State<MainScreen> {
                   const SizedBox(height: 20),
                   Row(
                     children: [
-                      CalcButton(text: "0", buttonStyle: numberButtonStyle, textStyle: numberTextStyle,),
+                      CalcButton(text: "0", buttonStyle: numberButtonStyle, textStyle: numberTextStyle, onPressed: () => enterNumber("0")),
                       const SizedBox(width: 20),
-                      CalcButton(text: ".", buttonStyle: numberButtonStyle, textStyle: numberTextStyle,),
+                      CalcButton(text: ".", buttonStyle: numberButtonStyle, textStyle: numberTextStyle, onPressed: () => enterNumber(".")),
                       const SizedBox(width: 20),
-                      CalcButton(text: "=", buttonStyle: equalsButtonStyle, textStyle: numberTextStyle,),
+                      CalcButton(text: "=", buttonStyle: equalsButtonStyle, textStyle: numberTextStyle, onPressed: () { calculateResult(); }),
                     ],
                   ),
                 ],
@@ -88,7 +120,27 @@ class _MainScreenState extends State<MainScreen> {
   Row buttonRow(List<String> labels, List<ButtonStyle> buttonStyles, List<TextStyle> textStyles) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(labels.length, (index) => CalcButton(text: labels[index], buttonStyle: buttonStyles[index], textStyle: textStyles[index],)),
+      children: List.generate(labels.length, (index) => CalcButton(
+          text: labels[index],
+          buttonStyle: buttonStyles[index],
+          textStyle: textStyles[index],
+          onPressed: () {
+            switch (labels[index]) {
+              case "C":
+                clearInput();
+                break;
+              case "+/-":
+                changeSign();
+                break;
+              case "%":
+                percentResult();
+                break;
+              default:
+                enterNumber(labels[index]);
+                break;
+            }
+          }
+      )),
     );
   }
 }
